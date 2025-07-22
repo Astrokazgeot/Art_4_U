@@ -27,6 +27,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+artifacts/art_classifier_model.h5
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
