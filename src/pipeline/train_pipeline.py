@@ -4,6 +4,7 @@ from tensorflow import keras
 from src.component.model_definition import ModelBuilder,ModelConfig
 from src.component.data_ingestion import DataIngestion
 from src.exception import CustomException
+import os
 
 @dataclass
 class TrainerConfig:
@@ -39,6 +40,7 @@ class ModelTrainer:
                 epochs=self.config.epochs,
                 validation_data=val_ds
             )
+            os.makedirs(os.path.dirname(self.config.model_output_path), exist_ok=True)
 
             
             self.model.save(self.config.model_output_path)
