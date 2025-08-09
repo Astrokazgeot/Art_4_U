@@ -6,7 +6,7 @@ import os
 
 app = FastAPI(title="🎨 Art Classifier API")
 
-# Enable CORS (for Streamlit or any frontend)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,13 +31,13 @@ async def predict_art(file: UploadFile = File(...)):
         contents = await file.read()
         temp_path = f"temp_{file.filename}"
 
-        # Write the uploaded content to a temp file
+        
         with open(temp_path, "wb") as f:
             f.write(contents)
 
         prediction = predictor.predict(temp_path)
 
-        # Clean up the temp file
+        
         os.remove(temp_path)
 
         return {"prediction": prediction}
