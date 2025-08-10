@@ -1,52 +1,28 @@
 import streamlit as st
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.resnet50 import preprocess_input
-import numpy as np
-import json
-import os
+import requests
 from PIL import Image
 
+API_URL = "http://localhost:8000/predict/"  
 
-MODEL_PATH = "artifacts/art_classifier_model.h5"
-CLASS_NAMES_PATH = "artifacts/class_names.json"
-
-
-@st.cache_resource
-def load_art_model():
-    model = load_model(MODEL_PATH)
-    return model
-
-@st.cache_resource
-def load_class_names():
-    with open(CLASS_NAMES_PATH, "r") as f:
-        return json.load(f)
-
-model = load_art_model()
-class_names = load_class_names()
-
-st.set_page_config(page_title="Art Classifier 🎨", layout="centered")
 st.title("🖼️ AI Art Style & Artist Classifier")
 
 uploaded_file = st.file_uploader("Upload an artwork image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
-    
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    
-    img = img.resize((224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
+    if st.button("Classify Artwork"):
+        
+        files = {"file": uploaded_file.getvalue()}
+        
+        with st.spinner("Classifying..."):
+            response = requests.post(API_URL, files=files)
 
-    
-    predictions = model.predict(img_array)
-    pred_index = np.argmax(predictions)
-    pred_class = class_names[pred_index]
-    confidence = float(np.max(predictions)) * 100
-
-    
-    st.subheader("🎯 Prediction:")
-    st.success(f"**{pred_class}** ({confidence:.2f}% confidence)")
+        if response.status_code == 200:
+            data = response.json()
+            prediction = data.get("prediction", "Unknown")
+            st.subheader("🎯 Prediction:")
+            st.success(prediction)
+        else:
+            st.error(f"Error: {response.text}")
